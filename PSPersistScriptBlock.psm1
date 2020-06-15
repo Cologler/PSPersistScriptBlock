@@ -16,10 +16,27 @@ function Persist-ScriptBlock([string] $name, [scriptblock] $block) {
     Set-Content $scriptPath $block.ToString().Trim() -Encoding $ENCODING
 }
 
+function List-ScriptBlock {
+    return Get-ChildItem $scriptBlocksDir | Where-Object {
+        $_.Extension -eq '.ps1'
+    } | ForEach-Object {
+        Write-Host ''
+        Write-Host "  $($_.BaseName) >"
+        Write-Host ''
+
+        $ctn = Get-Content $_.FullName -Encoding $ENCODING
+        foreach ($line in $ctn) {
+            Write-Host "      $line"
+        }
+
+        Write-Host ''
+    }
+}
+
 function Get-ScriptBlock([string] $name) {
     $scriptPath = Get-ScriptBlockPath $name
     if (Test-Path $scriptPath -PathType Leaf) {
-        $ctn = Get-Content $scriptPath -Encoding $ENCODING  -Raw
+        $ctn = Get-Content $scriptPath -Encoding $ENCODING -Raw
         return [scriptblock]::Create($ctn)
     } else {
         Write-Error -Message "Cannot find the script block with name '$Name'." -ErrorAction Stop
@@ -46,4 +63,9 @@ function Run-ScriptBlockOnNewScope([string] $name) {
     Invoke-Command -ScriptBlock $block
 }
 
-Export-ModuleMember -Function Persist-ScriptBlock,Get-ScriptBlock,Remove-ScriptBlock,Run-ScriptBlock
+Export-ModuleMember -Function `
+    Persist-ScriptBlock,
+    Get-ScriptBlock,
+    List-ScriptBlock,
+    Remove-ScriptBlock,
+    Run-ScriptBlock
