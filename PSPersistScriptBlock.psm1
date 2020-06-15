@@ -19,8 +19,18 @@ function Persist-ScriptBlock([string] $name, [scriptblock] $block) {
 function Get-ScriptBlock([string] $name) {
     $scriptPath = Get-ScriptBlockPath $name
     if (Test-Path $scriptPath -PathType Leaf) {
-        $ctn = Get-Content $scriptPath -Encoding $ENCODING
+        $ctn = Get-Content $scriptPath -Encoding $ENCODING  -Raw
         return [scriptblock]::Create($ctn)
+    } else {
+        Write-Error -Message "Cannot find the script block with name '$Name'." -ErrorAction Stop
+    }
+}
+
+function Remove-ScriptBlock([string] $name) {
+    $scriptPath = Get-ScriptBlockPath $name
+    if (Test-Path $scriptPath -PathType Leaf) {
+        Remove-Item $scriptPath
+        Write-Output "Script block '$name' removed."
     } else {
         Write-Error -Message "Cannot find the script block with name '$Name'." -ErrorAction Stop
     }
@@ -31,4 +41,4 @@ function Run-ScriptBlock([string] $name) {
     Invoke-Command -ScriptBlock $block -NoNewScope
 }
 
-Export-ModuleMember -Function Persist-ScriptBlock,Get-ScriptBlock,Run-ScriptBlock
+Export-ModuleMember -Function Persist-ScriptBlock,Get-ScriptBlock,Remove-ScriptBlock,Run-ScriptBlock
