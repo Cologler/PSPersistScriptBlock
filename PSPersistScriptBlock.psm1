@@ -41,4 +41,9 @@ function Run-ScriptBlock([string] $name) {
     Invoke-Command -ScriptBlock $block -NoNewScope
 }
 
+function Run-ScriptBlockOnNewScope([string] $name) {
+    $block = Get-ScriptBlock $name
+    Invoke-Command -ScriptBlock $block
+}
+
 Export-ModuleMember -Function Persist-ScriptBlock,Get-ScriptBlock,Remove-ScriptBlock,Run-ScriptBlock
