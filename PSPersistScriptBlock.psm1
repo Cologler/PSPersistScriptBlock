@@ -16,10 +16,14 @@ function Persist-ScriptBlock([string] $name, [scriptblock] $block) {
     Set-Content $scriptPath $block.ToString().Trim() -Encoding $ENCODING
 }
 
-function List-ScriptBlock {
+function Get-AllScriptBlockFiles() {
     return Get-ChildItem $scriptBlocksDir | Where-Object {
         $_.Extension -eq '.ps1'
-    } | ForEach-Object {
+    }
+}
+
+function List-ScriptBlock {
+    return Get-AllScriptBlockFiles | ForEach-Object {
         Write-Host ''
         Write-Host "  $($_.BaseName) >"
         Write-Host ''
@@ -61,6 +65,25 @@ function Run-ScriptBlock([string] $name) {
 function Run-ScriptBlockOnNewScope([string] $name) {
     $block = Get-ScriptBlock $name
     Invoke-Command -ScriptBlock $block
+}
+
+$s = {
+    param($commandName, $parameterName, $wordToComplete, $commandAst, $fakeBoundParameters)
+
+    return Get-AllScriptBlockFiles |
+        ForEach-Object {$_.BaseName}
+        Where-Object {$_ -like "$wordToComplete*"} |
+        ForEach-Object {
+        New-Object -Type System.Management.Automation.CompletionResult -ArgumentList $_,
+            $_,
+            "ParameterValue",
+            $_
+    }
+}
+
+'Get-ScriptBlock','Run-ScriptBlock','Run-ScriptBlockOnNewScope' |
+ForEach-Object {
+    Register-ArgumentCompleter -CommandName $_ -ParameterName Name -ScriptBlock $s
 }
 
 Export-ModuleMember -Function `
