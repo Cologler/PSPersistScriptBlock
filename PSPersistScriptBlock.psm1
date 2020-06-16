@@ -68,4 +68,5 @@ Export-ModuleMember -Function `
     Get-ScriptBlock,
     List-ScriptBlock,
     Remove-ScriptBlock,
-    Run-ScriptBlock
+    Run-ScriptBlock,
+    Run-ScriptBlockOnNewScope
