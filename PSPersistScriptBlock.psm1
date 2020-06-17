@@ -87,11 +87,11 @@ $s = {
         ForEach-Object {$_.BaseName}
         Where-Object {$_ -like "$wordToComplete*"} |
         ForEach-Object {
-        New-Object -Type System.Management.Automation.CompletionResult -ArgumentList $_,
-            $_,
-            "ParameterValue",
-            $_
-    }
+            New-Object -Type System.Management.Automation.CompletionResult -ArgumentList $_,
+                $_,
+                "ParameterValue",
+                $_
+        }
 }
 
 'Get-ScriptBlock','Run-ScriptBlock','Run-ScriptBlockOnNewScope' |
