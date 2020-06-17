@@ -11,9 +11,22 @@ function Get-ScriptBlockPath([string] $name) {
     return [System.IO.Path]::Combine($scriptBlocksDir, "$name.ps1")
 }
 
-function Persist-ScriptBlock([string] $name, [scriptblock] $block) {
-    $scriptPath = Get-ScriptBlockPath $name
-    Set-Content $scriptPath $block.ToString().Trim() -Encoding $ENCODING
+<#
+    .Description
+    Persist a ScriptBlock on disk.
+
+    .Example
+    Persist-ScriptBlock -Name test -ScriptBlock {
+        Write-Host 'runing test'
+    }
+#>
+function Persist-ScriptBlock (
+    [Parameter(Mandatory=$true)][string] $Name,
+    [Parameter(Mandatory=$true)][scriptblock] $ScriptBlock
+) {
+
+    $scriptPath = Get-ScriptBlockPath $Name
+    Set-Content $scriptPath $ScriptBlock.ToString().Trim() -Encoding $ENCODING
 }
 
 function Get-AllScriptBlockFiles() {
@@ -37,8 +50,8 @@ function List-ScriptBlock {
     }
 }
 
-function Get-ScriptBlock([string] $name) {
-    $scriptPath = Get-ScriptBlockPath $name
+function Get-ScriptBlock([Parameter(Mandatory=$true)][string] $Name) {
+    $scriptPath = Get-ScriptBlockPath $Name
     if (Test-Path $scriptPath -PathType Leaf) {
         $ctn = Get-Content $scriptPath -Encoding $ENCODING -Raw
         return [scriptblock]::Create($ctn)
@@ -47,23 +60,23 @@ function Get-ScriptBlock([string] $name) {
     }
 }
 
-function Remove-ScriptBlock([string] $name) {
-    $scriptPath = Get-ScriptBlockPath $name
+function Remove-ScriptBlock([Parameter(Mandatory=$true)][string] $Name) {
+    $scriptPath = Get-ScriptBlockPath $Name
     if (Test-Path $scriptPath -PathType Leaf) {
         Remove-Item $scriptPath
-        Write-Output "Script block '$name' removed."
+        Write-Output "Script block '$Name' removed."
     } else {
         Write-Error -Message "Cannot find the script block with name '$Name'." -ErrorAction Stop
     }
 }
 
-function Run-ScriptBlock([string] $name) {
-    $block = Get-ScriptBlock $name
+function Run-ScriptBlock([Parameter(Mandatory=$true)][string] $Name) {
+    $block = Get-ScriptBlock $Name
     Invoke-Command -ScriptBlock $block -NoNewScope
 }
 
-function Run-ScriptBlockOnNewScope([string] $name) {
-    $block = Get-ScriptBlock $name
+function Run-ScriptBlockOnNewScope([Parameter(Mandatory=$true)][string] $Name) {
+    $block = Get-ScriptBlock $Name
     Invoke-Command -ScriptBlock $block
 }
 
